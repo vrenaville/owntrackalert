@@ -47,11 +47,11 @@ def on_message_ttn(client, userdata, msg):
     logging.info("message from ttn received for %s", data["end_device_ids"]["dev_eui"])
 
     # retrieve info about gateway
-    gtw_id = data["uplink_message"]["rx_metadata"][0]["gateway_ids"]["gtw_id"]
+    gtw_id = data["uplink_message"]["rx_metadata"][0]["gateway_ids"]["gateway_id"]
     try:
         gtw_info = requests.get("https://www.thethingsnetwork.org/gateway-data/gateway/"+gtw_id).json()
         logging.info("received via gw %s, %s, owned by %s",
-            data["uplink_message"]["rx_metadata"][0]["gateway_ids"]["gtw_id"],
+            gtw_id,
             gtw_info[gtw_id]["description"],
             gtw_info[gtw_id]["owner"],
         )
