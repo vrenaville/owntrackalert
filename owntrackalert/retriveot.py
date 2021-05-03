@@ -38,32 +38,54 @@ def on_log(client, userdata, level, buf):
 # The callback for when a PUBLISH message is received from the server.
 def on_message_ot(client, userdata, msg):
     data = json.loads(msg.payload)
-    logging.info("message from ttn received for %s", data["tid"])
-    sql_record = {
-       "accuracy": data["acc"],
-       "altitude":data["alt"],
-       "battery":data["batt"],
-       "latitude":data["lat"],
-       "longitude":data["lon"],
-       "trackerid":data["tid"],
-       "timestamp":data["tst"],
-       "verticalaccuracy":data["vac"],
-       "velocity":data["vel"],
-       "connection":data["conn"],
-       "userid":1,
-       
-    }
-    cur = CON.cursor()
+    if data['_type'] == 'location':
+        logging.info("message from ttn received for %s", data["tid"])
+        sql_record = {
+        "accuracy": data["acc"],
+        "altitude":data["alt"],
+        "battery":data["batt"],
+        "latitude":data["lat"],
+        "longitude":data["lon"],
+        "trackerid":data["tid"],
+        "timestamp":data["tst"],
+        "verticalaccuracy":data["vac"],
+        "velocity":data["vel"],
+        "connection":data["conn"],
+        "userid":1,
+        
+        }
+        cur = CON.cursor()
 
-    columns = ', '.join(sql_record.keys())
-    placeholders = ', '.join('?' * len(sql_record))
-    sql = 'INSERT INTO points ({}) VALUES ({})'.format(columns, placeholders)
-    values = [int(x) if isinstance(x, bool) else x for x in sql_record.values()]
-    cur.execute(sql, values)
-    CON.commit()
+        columns = ', '.join(sql_record.keys())
+        placeholders = ', '.join('?' * len(sql_record))
+        sql = 'INSERT INTO points ({}) VALUES ({})'.format(columns, placeholders)
+        values = [int(x) if isinstance(x, bool) else x for x in sql_record.values()]
+        cur.execute(sql, values)
+        CON.commit()
 
-    logging.info("data processing done")
+        logging.info("data processing done")
+    elif data['_type'] == 'lwt':
+        logging.info("Lost connection")
+    elif data['_type'] == 'waypoint':
+        logging.info("Lost connection")
+        sql_record = {
+            "longitude": data["lon"],
+            "latitude": data["lat"],
+            "name": data["desc"],
+            "radius": data["radius"]
+            "comment": "",
+        }
+        cur = CON.cursor()
 
+        columns = ', '.join(sql_record.keys())
+        placeholders = ', '.join('?' * len(sql_record))
+        sql = 'INSERT INTO waypoints ({}) VALUES ({})'.format(columns, placeholders)
+        values = [int(x) if isinstance(x, bool) else x for x in sql_record.values()]
+        cur.execute(sql, values)
+        CON.commit()
+
+
+waypoint
 def shutdown():
     logging.info("disconnecting from mqtt")
     client_ot.disconnect()
