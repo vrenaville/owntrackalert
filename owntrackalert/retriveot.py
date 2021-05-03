@@ -92,8 +92,6 @@ def on_message_ot(client, userdata, msg):
         cur.execute(sql, values)
         CON.commit()
 
-
-waypoint
 def shutdown():
     logging.info("disconnecting from mqtt")
     client_ot.disconnect()
