@@ -30,16 +30,24 @@ def on_log(client, userdata, level, buf):
     logging_level = mqtt.LOGGING_LEVEL[level]
     logging.log(logging_level, buf)
 
-    #logging.info("got a log message level %s: %s", level, str(buf))
-    if "PINGRESP" in str(buf):
-        # report to https://healthchecks.io to tell that the connection is alive
-        requests.get(HC_PING_URL)
+def CreateUpdateUser(cur, tid):
+    cur.execute("SELECT id FROM users where name =?", (tid,))
+    
+    rows = cur.fetchall()
+    if rows:
+        return rows[0]['id']
+    else:
+        cur.execute("INSERT INTO users where name =?", (tid,))
+        return cur.lastrowid
+
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message_ot(client, userdata, msg):
     data = json.loads(msg.payload)
     if data['_type'] == 'location':
         logging.info("message from ttn received for %s", data["tid"])
+        cur = CON.cursor()
+        user_id = CreateUpdateUser(cur, data["tid"])
         sql_record = {
         "accuracy": data["acc"],
         "altitude":data["alt"],
@@ -51,10 +59,10 @@ def on_message_ot(client, userdata, msg):
         "verticalaccuracy":data["vac"],
         "velocity":data["vel"],
         "connection":data["conn"],
-        "userid":1,
+        "userid":user_id,
         
         }
-        cur = CON.cursor()
+ 
 
         columns = ', '.join(sql_record.keys())
         placeholders = ', '.join('?' * len(sql_record))
@@ -72,7 +80,7 @@ def on_message_ot(client, userdata, msg):
             "longitude": data["lon"],
             "latitude": data["lat"],
             "name": data["desc"],
-            "radius": data["radius"]
+            "radius": data["radius"],
             "comment": "",
         }
         cur = CON.cursor()
