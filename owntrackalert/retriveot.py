@@ -20,7 +20,7 @@ OT_TID="dragino"
 
 def on_connect_ot(client, userdata, flags, rc):
     logging.info("connected to ot %s - %s", MQTT_HOST, str(rc))
-    client.subscribe("owntracks/+/+")
+    client.subscribe("owntracks/+/+/+")
 
 
 def on_publish_ot(client, userdata, rc):
@@ -35,7 +35,7 @@ def CreateUpdateUser(cur, tid):
     
     rows = cur.fetchall()
     if rows:
-        return rows[0]['id']
+        return rows[0][0]
     else:
         cur.execute("INSERT INTO users (name) VALUES (?)", (tid,))
         return cur.lastrowid
@@ -49,7 +49,7 @@ def on_message_ot(client, userdata, msg):
         cur = CON.cursor()
         user_id = CreateUpdateUser(cur, data["tid"])
         sql_record = {
-        "accuracy": "acc" in data and data["acc"] or '',
+        "accuracy": data["acc"],
         "altitude":data["alt"],
         "battery":data["batt"],
         "latitude":data["lat"],
