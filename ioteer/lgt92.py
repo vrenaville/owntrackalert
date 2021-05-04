@@ -61,7 +61,7 @@ def on_message_ttn(client, userdata, msg):
     # max is 4 volts, 3 volts is considered empty
     batpercent = round((data["uplink_message"]["decoded_payload"]["BatV"] - 3) * 100)
 
-    if d["uplink_message"]["decoded_payload"]["ALARM_status"]:
+    if data["uplink_message"]["decoded_payload"]["ALARM_status"]:
         logging.info("Red button pushed!")
 
     logging.info("Motion detection: %s", data["uplink_message"]["decoded_payload"]["MD"])

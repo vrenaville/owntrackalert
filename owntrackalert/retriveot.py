@@ -37,7 +37,7 @@ def CreateUpdateUser(cur, tid):
     if rows:
         return rows[0]['id']
     else:
-        cur.execute("INSERT INTO users where name =?", (tid,))
+        cur.execute("INSERT INTO users (name) VALUES (?)", (tid,))
         return cur.lastrowid
 
 
