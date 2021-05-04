@@ -74,13 +74,13 @@ def on_message_ttn(client, userdata, msg):
             "desc": "ALERT BUTTON PRESSED !!!!!",
             "t": "c",
         })
-        ALERT_FLAG[OT_ID] = 1
+        ALERT_FLAG[OT_TID] = 1
         # publish to owntracks
         logging.info("publishing alert to owntracks via mqtt to topic %s", OT_TOPIC)
         client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
         logging.info("Red button pushed!")
     else:
-        if ALERT_FLAG[OT_ID] == 1:
+        if ALERT_FLAG[OT_TID] == 1:
             ot_data = json.dumps({
                 "_type": "transition",
                 "wtst": int(datetime.timestamp(datetime.now())),
@@ -94,7 +94,7 @@ def on_message_ttn(client, userdata, msg):
                 "t": "c",
             })
         else:
-            ALERT_FLAG[OT_ID] = 0
+            ALERT_FLAG[OT_TID] = 0
 
     logging.info("Motion detection: %s", data["uplink_message"]["decoded_payload"]["MD"])
     logging.info("LED status for position: %s", data["uplink_message"]["decoded_payload"]["LON"])
