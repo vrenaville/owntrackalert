@@ -20,7 +20,7 @@ OT_TID="dragino"
 
 def on_connect_ot(client, userdata, flags, rc):
     logging.info("connected to ot %s - %s", MQTT_HOST, str(rc))
-    client.subscribe("owntracks/+/+/+")
+    client.subscribe("owntracks/+/+")
 
 
 def on_publish_ot(client, userdata, rc):
