@@ -93,8 +93,13 @@ def on_message_ttn(client, userdata, msg):
                 "desc": "ALERT BUTTON finished :)",
                 "t": "c",
             })
+            # publish to owntracks
+            logging.info("publishing alert to owntracks via mqtt to topic %s", OT_TOPIC)
+            client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
+            logging.info("Alert finished!")
         else:
             ALERT_FLAG[OT_TID] = 0
+
 
     logging.info("Motion detection: %s", data["uplink_message"]["decoded_payload"]["MD"])
     logging.info("LED status for position: %s", data["uplink_message"]["decoded_payload"]["LON"])
