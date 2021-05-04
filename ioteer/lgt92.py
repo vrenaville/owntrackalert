@@ -20,7 +20,7 @@ VERSION = "v2.0"
 
 OT_TOPIC="owntracks/alexandre/dragino"
 OT_TID="dragino"
-
+ALERT_FLAG = {}
 def on_connect_ttn(client, userdata, flags, rc):
     logging.info("connected to ttn %s - %s", SRC_MQTT_HOST, str(rc))
     #client.subscribe("+/devices/+/up")
@@ -71,14 +71,30 @@ def on_message_ttn(client, userdata, msg):
             "acc": 0,
             "tid": OT_TID,
             "event": "enter",
-            "desc": "Alter button press",
+            "desc": "ALERT BUTTON PRESSED !!!!!",
             "t": "c",
         })
-
+        ALERT_FLAG[OT_ID] = 1
         # publish to owntracks
         logging.info("publishing alert to owntracks via mqtt to topic %s", OT_TOPIC)
         client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
         logging.info("Red button pushed!")
+    else:
+        if ALERT_FLAG[OT_ID] == 1:
+            ot_data = json.dumps({
+                "_type": "transition",
+                "wtst": int(datetime.timestamp(datetime.now())),
+                "lat": data["uplink_message"]["decoded_payload"]["Latitude"],
+                "lon": data["uplink_message"]["decoded_payload"]["Longitude"],
+                "tst": int(datetime.timestamp(datetime.now())),
+                "acc": 0,
+                "tid": OT_TID,
+                "event": "leave",
+                "desc": "ALERT BUTTON finished :)",
+                "t": "c",
+            })
+        else:
+            ALERT_FLAG[OT_ID] = 0
 
     logging.info("Motion detection: %s", data["uplink_message"]["decoded_payload"]["MD"])
     logging.info("LED status for position: %s", data["uplink_message"]["decoded_payload"]["LON"])
