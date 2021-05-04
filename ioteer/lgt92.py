@@ -61,7 +61,23 @@ def on_message_ttn(client, userdata, msg):
     # max is 4 volts, 3 volts is considered empty
     batpercent = round((data["uplink_message"]["decoded_payload"]["BatV"] - 3) * 100)
 
-    if data["uplink_message"]["decoded_payload"]["ALARM_status"]:
+    if data["uplink_message"]["decoded_payload"]["ALARM_status"] != "FALSE":
+        ot_data = json.dumps({
+            "_type": "transition",
+            "wtst": int(datetime.timestamp(datetime.now())),
+            "lat": data["uplink_message"]["decoded_payload"]["Latitude"],
+            "lon": data["uplink_message"]["decoded_payload"]["Longitude"],
+            "tst": int(datetime.timestamp(datetime.now())),
+            "acc": 0,
+            "tid": OT_TID,
+            "event": "enter",
+            "desc": "Alter button press",
+            "t": "c",
+        })
+
+        # publish to owntracks
+        logging.info("publishing alert to owntracks via mqtt to topic %s", OT_TOPIC)
+        client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
         logging.info("Red button pushed!")
 
     logging.info("Motion detection: %s", data["uplink_message"]["decoded_payload"]["MD"])
@@ -83,6 +99,7 @@ def on_message_ttn(client, userdata, msg):
         # transform received data into OwnTracks format
         ot_data = json.dumps({
             "_type": "location",
+            "acc": 0,
             "lat": data["uplink_message"]["decoded_payload"]["Latitude"],
             "lon": data["uplink_message"]["decoded_payload"]["Longitude"],
             "batt": batpercent,

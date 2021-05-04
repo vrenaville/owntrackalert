@@ -49,7 +49,7 @@ def on_message_ot(client, userdata, msg):
         cur = CON.cursor()
         user_id = CreateUpdateUser(cur, data["tid"])
         sql_record = {
-        "accuracy": data["acc"],
+        "accuracy": "acc" in data and data["acc"] or '',
         "altitude":data["alt"],
         "battery":data["batt"],
         "latitude":data["lat"],
