@@ -80,7 +80,7 @@ def on_message_ttn(client, userdata, msg):
         client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
         logging.info("Red button pushed!")
     else:
-        if ALERT_FLAG[OT_TID] == 1:
+        if OT_TID in ALERT_FLAG and ALERT_FLAG[OT_TID] == 1:
             ot_data = json.dumps({
                 "_type": "transition",
                 "wtst": int(datetime.timestamp(datetime.now())),
