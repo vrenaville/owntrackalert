@@ -20,7 +20,7 @@ OT_TID="dragino"
 
 def on_connect_ot(client, userdata, flags, rc):
     logging.info("connected to ot %s - %s", MQTT_HOST, str(rc))
-    client.subscribe("owntracks/+/+")
+    client.subscribe("owntracks/#")
 
 
 def on_publish_ot(client, userdata, rc):
@@ -45,7 +45,7 @@ def CreateUpdateUser(cur, tid):
 def on_message_ot(client, userdata, msg):
     data = json.loads(msg.payload)
     if data['_type'] == 'location':
-        logging.info("message from ttn received for %s", data["tid"])
+        logging.info("point from ot received for %s", data["tid"])
         cur = CON.cursor()
         user_id = CreateUpdateUser(cur, data["tid"])
         sql_record = {
@@ -75,7 +75,7 @@ def on_message_ot(client, userdata, msg):
     elif data['_type'] == 'lwt':
         logging.info("Lost connection")
     elif data['_type'] == 'waypoint':
-        logging.info("Lost connection")
+        logging.info("Waypoint")
         sql_record = {
             "longitude": data["lon"],
             "latitude": data["lat"],

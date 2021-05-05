@@ -97,6 +97,7 @@ def on_message_ttn(client, userdata, msg):
             logging.info("publishing alert to owntracks via mqtt to topic %s", OT_TOPIC)
             client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
             logging.info("Alert finished!")
+            ALERT_FLAG[OT_TID] = 0
         else:
             ALERT_FLAG[OT_TID] = 0
 
