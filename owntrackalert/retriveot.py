@@ -80,7 +80,7 @@ def on_message_ot(client, userdata, msg):
             "longitude": data["lon"],
             "latitude": data["lat"],
             "name": data["desc"],
-            "radius": data["radius"],
+            "radius": data["rad"],
             "comment": "",
         }
         cur = CON.cursor()
