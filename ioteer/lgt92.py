@@ -5,7 +5,6 @@ import logging
 import signal
 import requests
 from datetime import datetime
-from influxdb import InfluxDBClient
 from dotenv import find_dotenv, load_dotenv
 
 load_dotenv(find_dotenv())
