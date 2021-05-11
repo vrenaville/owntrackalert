@@ -60,7 +60,7 @@ def jsonping(data,OT_TID,event):
 def pingenten(data,OT_TID):
     return jsonping(data,OT_TID,"enter")
 
-def pingleave(data,OT_TID)
+def pingleave(data,OT_TID):
    return jsonping(data,OT_TID,"leave")
 
 
