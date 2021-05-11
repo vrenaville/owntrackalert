@@ -15,6 +15,8 @@ DST_MQTT_HOST = os.getenv("DST_MQTT_HOST")
 DST_MQTT_USER = os.getenv("DST_MQTT_USER")
 DST_MQTT_PASS = os.getenv("DST_MQTT_PASS")
 HC_PING_URL = os.getenv("HC_PING_URL")
+TRACEPING = os.getenv("TRACEPING")
+
 VERSION = "v2.0"
 
 OT_TOPIC="owntracks/alexandre/dragino"
@@ -38,6 +40,28 @@ def on_log(client, userdata, level, buf):
     if "PINGRESP" in str(buf):
         # report to https://healthchecks.io to tell that the connection is alive
         requests.get(HC_PING_URL)
+
+def jsonping(data,OT_TID,event):
+    ot_data = json.dumps({
+        "_type": "transition",
+        "wtst": int(datetime.timestamp(datetime.now())),
+        "lat": data["uplink_message"]["decoded_payload"]["Latitude"],
+        "lon": data["uplink_message"]["decoded_payload"]["Longitude"],
+        "tst": int(datetime.timestamp(datetime.now())),
+        "acc": 0,
+        "tid": OT_TID,
+        "event": event,
+        "desc": "Ping from %s" %(OT_TID),
+        "t": "c",
+    })
+    return ot_data
+
+def pingenten(data,OT_TID):
+    return jsonping(data,OT_TID,"enter")
+
+def pingleave(data,OT_TID)
+   return jsonping(data,OT_TID,"leave")
+
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message_ttn(client, userdata, msg):
@@ -99,7 +123,9 @@ def on_message_ttn(client, userdata, msg):
             ALERT_FLAG[OT_TID] = 0
         else:
             ALERT_FLAG[OT_TID] = 0
-
+    if TRACEPING == "1":
+        client_ot.publish(OT_TOPIC, payload=pingenten(data,OT_TID), retain=True, qos=1)
+        client_ot.publish(OT_TOPIC, payload=pingleave(data,OT_TID), retain=True, qos=1)
 
     logging.info("Motion detection: %s", data["uplink_message"]["decoded_payload"]["MD"])
     logging.info("LED status for position: %s", data["uplink_message"]["decoded_payload"]["LON"])
