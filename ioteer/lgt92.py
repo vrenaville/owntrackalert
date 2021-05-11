@@ -42,6 +42,7 @@ def on_log(client, userdata, level, buf):
         requests.get(HC_PING_URL)
 
 def jsonping(data,OT_TID,event):
+    gtw_id = data["uplink_message"]["rx_metadata"][0]["gateway_ids"]["gateway_id"]
     ot_data = json.dumps({
         "_type": "transition",
         "wtst": int(datetime.timestamp(datetime.now())),
@@ -51,7 +52,7 @@ def jsonping(data,OT_TID,event):
         "acc": 0,
         "tid": OT_TID,
         "event": event,
-        "desc": "Ping from %s" %(OT_TID),
+        "desc": "Ping from %s received by %s" %(OT_TID, gtw_id),
         "t": "c",
     })
     return ot_data
