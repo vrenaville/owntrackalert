@@ -67,7 +67,6 @@ def pingleave(data,OT_TID):
 # The callback for when a PUBLISH message is received from the server.
 def on_message_ttn(client, userdata, msg):
     data = json.loads(msg.payload)
-    logging.info("%s", data)
     logging.info("message from ttn received for %s", data["end_device_ids"]["dev_eui"])
 
     # retrieve info about gateway
@@ -125,19 +124,20 @@ def on_message_ttn(client, userdata, msg):
         else:
             ALERT_FLAG[OT_TID] = 0
     if TRACEPING == "1":
-        client_ot.publish(OT_TOPIC, payload=pingenten(data,OT_TID), retain=True, qos=1)
-        client_ot.publish(OT_TOPIC, payload=pingleave(data,OT_TID), retain=True, qos=1)
+        logging.info("%s", data)
+        logging.info("DEBUG: Ping from %s", OT_TID)
+        logging.info("DEBUG: Received from %s", gtw_id)
+        #client_ot.publish(OT_TOPIC, payload=pingenten(data,OT_TID), retain=True, qos=1)
+        #client_ot.publish(OT_TOPIC, payload=pingleave(data,OT_TID), retain=True, qos=1)
 
     logging.info("Motion detection: %s", data["uplink_message"]["decoded_payload"]["MD"])
     logging.info("LED status for position: %s", data["uplink_message"]["decoded_payload"]["LON"])
     logging.info("Firmware version: %s", data["uplink_message"]["decoded_payload"]["FW"])
 
     got_fix = False
-    if data["uplink_message"]["decoded_payload"]["Latitude"] == 0:
+    if data["uplink_message"]["decoded_payload"]["Latitude"] == 0 or data["uplink_message"]["decoded_payload"]["Latitude"] == -1e-06 :
         logging.info("no GPS data (Latitude) present")
         # set GPS data to 0 for InfluxDB
-        data["uplink_message"]["decoded_payload"]["Latitude"] = 0.0
-        data["uplink_message"]["decoded_payload"]["Longitude"] = 0.0
     else:
         logging.info("GPS data (Latitude) present: lat %s, lon %s",
           data["uplink_message"]["decoded_payload"]["Latitude"],
