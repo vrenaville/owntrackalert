@@ -5,9 +5,11 @@ import logging
 import signal
 import requests
 from datetime import datetime
+from datetime import timedelta
+
 from dotenv import find_dotenv, load_dotenv
 import sqlite3
-
+from geo_position import GeoPositionAlerting
 
 load_dotenv(find_dotenv())
 MQTT_HOST = os.getenv("DST_MQTT_HOST")
@@ -17,6 +19,7 @@ MQTT_PASS = os.getenv("DST_MQTT_PASS")
 VERSION = "v1.0"
 CON = False
 OT_TID="dragino"
+USER_LAST_SEEN={}
 
 def on_connect_ot(client, userdata, flags, rc):
     logging.info("connected to ot %s - %s", MQTT_HOST, str(rc))
@@ -39,6 +42,15 @@ def CreateUpdateUser(cur, tid):
     else:
         cur.execute("INSERT INTO users (name) VALUES (?)", (tid,))
         return cur.lastrowid
+
+def getpreviousposition(cur,user_id):
+    sql_query = """SELECT longitude,latitude from points
+        where userid = ? and timestamp BETWEEN ? AND ? ORDER BY ID"""
+    query = cur.execute(
+        sql_query,
+        (user_id,int(datetime.timestamp(datetime.now() - timedelta(0,10))),int(datetime.timestamp(datetime.now()))))
+
+    return query
 
 
 # The callback for when a PUBLISH message is received from the server.
@@ -70,7 +82,17 @@ def on_message_ot(client, userdata, msg):
         values = [int(x) if isinstance(x, bool) else x for x in sql_record.values()]
         cur.execute(sql, values)
         CON.commit()
-
+        # manage alarm
+        lasteen = USER_LAST_SEEN.get(user_id,False)
+        geocheck = GeoPositionAlerting(user_id=user_id,lastseen=lasteen,alertinglevel=5,radius=50)
+        check_needed, check_date = geocheck.needcheck()
+        USER_LAST_SEEN[user_id] = check_date
+        if not check_needed:
+            print(check_date)
+            pointlist = getpreviousposition(cur,user_id)
+            needalarm =geocheck.checkraisealarm(pointlist.fetchall(),[data["lat"],data["lon"]])
+            logging.info("DEBUG : ")
+ 
         logging.info("data processing done")
     elif data['_type'] == 'lwt':
         logging.info("Lost connection")
