@@ -19,7 +19,9 @@ MQTT_PASS = os.getenv("DST_MQTT_PASS")
 VERSION = "v1.0"
 CON = False
 OT_TID="dragino"
+OT_TOPIC="owntracks/recorder/alert"
 USER_LAST_SEEN={}
+USER_ALARM_LEVEL={}
 
 def on_connect_ot(client, userdata, flags, rc):
     logging.info("connected to ot %s - %s", MQTT_HOST, str(rc))
@@ -50,19 +52,19 @@ def getpreviousposition(cur,user_id):
         sql_query,
         (user_id,int(datetime.timestamp(datetime.now() - timedelta(0,10))),int(datetime.timestamp(datetime.now()))))
 
-    return query
+    return query.fetchall()
 
-def jsonping(data,OT_TID,event):
+def jsonping(data,event):
     ot_data = json.dumps({
         "_type": "transition",
         "wtst": int(datetime.timestamp(datetime.now())),
-        "lat": data["uplink_message"]["decoded_payload"]["Latitude"],
-        "lon": data["uplink_message"]["decoded_payload"]["Longitude"],
+        "lat": data["lat"],
+        "lon": data["lon"],
         "tst": int(datetime.timestamp(datetime.now())),
         "acc": 0,
-        "tid": OT_TID,
+        "tid": data["tid"],
         "event": event,
-        "desc": "No move from %s since 10 minutes" %(OT_TID,),
+        "desc": "No move from %s since 10 minutes" %(data["tid"],),
         "t": "c",
     })
     return ot_data
@@ -95,8 +97,6 @@ def on_message_ot(client, userdata, msg):
         "userid":user_id,
         
         }
- 
-
         columns = ', '.join(sql_record.keys())
         placeholders = ', '.join('?' * len(sql_record))
         sql = 'INSERT INTO points ({}) VALUES ({})'.format(columns, placeholders)
@@ -105,16 +105,19 @@ def on_message_ot(client, userdata, msg):
         CON.commit()
         # manage alarm
         lasteen = USER_LAST_SEEN.get(user_id,False)
-        geocheck = GeoPositionAlerting(user_id=user_id,lastseen=lasteen,alertinglevel=5,radius=50)
+        levelalarm = USER_ALARM_LEVEL.get(user_id,0)
+        geocheck = GeoPositionAlerting(user_id=user_id,lastseen=lasteen,alertinglevel=levelalarm,radius=50)
         check_needed, check_date = geocheck.needcheck()
         USER_LAST_SEEN[user_id] = check_date
         if check_needed:
             pointlist = getpreviousposition(cur,user_id)
-            needalarm =geocheck.checkraisealarm(pointlist.fetchall(),[data["lat"],data["lon"]])
+            needalarm, levelalarm=geocheck.checkraisealarm(pointlist,[data["lon"],data["lat"]])
             if needalarm:
-                client_ot.publish(OT_TOPIC, payload=pingenten(data,OT_TID), retain=True, qos=1)
+                client_ot.publish(OT_TOPIC,payload=pingenten(data), retain=True, qos=1)
             else:
-                client_ot.publish(OT_TOPIC, payload=pingleave(data,OT_TID), retain=True, qos=1)
+                client_ot.publish(OT_TOPIC,payload=pingleave(data), retain=True, qos=1)
+                USER_ALARM_LEVEL[user_id] = 0
+                USER_LAST_SEEN[user_id] = False
 
             logging.info("DEBUG : ")
  

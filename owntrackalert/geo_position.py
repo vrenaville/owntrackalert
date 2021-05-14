@@ -48,7 +48,9 @@ class GeoPositionAlerting:
         olddest_point = (old_longitude, old_latitude)
         newpoint = (currentpoint[0], currentpoint[1])
         distance = geodesic(olddest_point, newpoint).meters
-        if distance < self.autorisedradius:
-            return True
+        if distance > self.autorisedradius and self.alertinglevel < 10:
+            return False, self.alertinglevel + 1
+        elif distance > self.autorisedradius and self.alertinglevel >= 10:
+            return True, 0
         else:
-            return False
+            return False, self.alertinglevel
