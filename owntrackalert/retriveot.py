@@ -69,11 +69,11 @@ def jsonping(data,event):
     })
     return ot_data
 
-def pingenten(data,OT_TID):
-    return jsonping(data,OT_TID,"enter")
+def pingenten(data):
+    return jsonping(data,"enter")
 
-def pingleave(data,OT_TID):
-   return jsonping(data,OT_TID,"leave")
+def pingleave(data):
+   return jsonping(data,"leave")
 
 
 # The callback for when a PUBLISH message is received from the server.
