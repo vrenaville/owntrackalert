@@ -52,6 +52,27 @@ def getpreviousposition(cur,user_id):
 
     return query
 
+def jsonping(data,OT_TID,event):
+    ot_data = json.dumps({
+        "_type": "transition",
+        "wtst": int(datetime.timestamp(datetime.now())),
+        "lat": data["uplink_message"]["decoded_payload"]["Latitude"],
+        "lon": data["uplink_message"]["decoded_payload"]["Longitude"],
+        "tst": int(datetime.timestamp(datetime.now())),
+        "acc": 0,
+        "tid": OT_TID,
+        "event": event,
+        "desc": "No move from %s since 10 minutes" %(OT_TID,),
+        "t": "c",
+    })
+    return ot_data
+
+def pingenten(data,OT_TID):
+    return jsonping(data,OT_TID,"enter")
+
+def pingleave(data,OT_TID):
+   return jsonping(data,OT_TID,"leave")
+
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message_ot(client, userdata, msg):
@@ -87,10 +108,14 @@ def on_message_ot(client, userdata, msg):
         geocheck = GeoPositionAlerting(user_id=user_id,lastseen=lasteen,alertinglevel=5,radius=50)
         check_needed, check_date = geocheck.needcheck()
         USER_LAST_SEEN[user_id] = check_date
-        if not check_needed:
-            print(check_date)
+        if check_needed:
             pointlist = getpreviousposition(cur,user_id)
             needalarm =geocheck.checkraisealarm(pointlist.fetchall(),[data["lat"],data["lon"]])
+            if needalarm:
+                client_ot.publish(OT_TOPIC, payload=pingenten(data,OT_TID), retain=True, qos=1)
+            else:
+                client_ot.publish(OT_TOPIC, payload=pingleave(data,OT_TID), retain=True, qos=1)
+
             logging.info("DEBUG : ")
  
         logging.info("data processing done")

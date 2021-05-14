@@ -148,6 +148,7 @@ def on_message_ttn(client, userdata, msg):
         ot_data = json.dumps({
             "_type": "location",
             "acc": 0,
+            "alt": 0,
             "lat": data["uplink_message"]["decoded_payload"]["Latitude"],
             "lon": data["uplink_message"]["decoded_payload"]["Longitude"],
             "batt": batpercent,
