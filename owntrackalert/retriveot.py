@@ -122,9 +122,13 @@ def on_message_ot(client, userdata, msg):
             needalarm, levelalarm=geocheck.checkraisealarm(pointlist,[data["lon"],data["lat"]],waypoints)
             USER_ALARM_LEVEL[user_id] = levelalarm
             if needalarm:
-                client_ot.publish(OT_TOPIC,payload=pingenten(data), retain=True, qos=1)
-            else:
+                if levelalarm < 10:
+                    client_ot.publish(OT_TOPIC,payload=pingenten(data), retain=True, qos=1)
+            elif not needalarm and levelalarm != 0:
                 client_ot.publish(OT_TOPIC,payload=pingleave(data), retain=True, qos=1)
+                USER_LAST_SEEN[user_id] = False
+                USER_ALARM_LEVEL[user_id] = 0
+            else:
                 USER_LAST_SEEN[user_id] = False
 
             logging.info("DEBUG : ")

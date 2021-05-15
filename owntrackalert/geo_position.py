@@ -44,21 +44,19 @@ class GeoPositionAlerting:
  
     def checkraisealarm(self,points,currentpoint,waypoints):
         if not points:
-            return False, 0
+            return False, self.alertinglevel
         if self.insafezone(points,waypoints):
-            return False, 0
+            return False, self.alertinglevel
         # Get oldest point:
         old_longitude = points[0][0]
         old_latitude = points[0][1]
         olddest_point = (old_longitude, old_latitude)
         newpoint = (currentpoint[0], currentpoint[1])
         distance = geodesic(olddest_point, newpoint).meters
-        if distance > self.autorisedradius and self.alertinglevel < 10:
+        if distance > self.autorisedradius:
             return True, self.alertinglevel + 1
-        elif distance > self.autorisedradius and self.alertinglevel >= 10:
-            return False, 0
         else:
-            return False, 0
+            return False, self.alertinglevel
 
     def insafezone(self,points,waypoints):
         insafezone = False
