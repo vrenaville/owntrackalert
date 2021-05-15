@@ -24,7 +24,10 @@ class GeoPositionAlerting:
     def needcheck(self):
         check_date = False
         check_needed = False
-        if not self.lastseen:
+        if self.alertinglevel != 0:
+            check_date = self.lastseen
+            check_needed = True
+        elif not self.lastseen:
             check_date = datetime.now()
             check_needed = False
         elif self.lastseen + timedelta(0,3600) <=  datetime.now() :

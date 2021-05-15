@@ -116,15 +116,14 @@ def on_message_ot(client, userdata, msg):
         geocheck = GeoPositionAlerting(user_id=user_id,lastseen=lasteen,alertinglevel=levelalarm,radius=50)
         check_needed, check_date = geocheck.needcheck()
         USER_LAST_SEEN[user_id] = check_date
-        if check_needed or levelalarm != 0:
+        if check_needed:
             pointlist = getpreviousposition(cur,user_id)
             needalarm, levelalarm=geocheck.checkraisealarm(pointlist,[data["lon"],data["lat"]])
+            USER_ALARM_LEVEL[user_id] = levelalarm
             if needalarm:
                 client_ot.publish(OT_TOPIC,payload=pingenten(data), retain=True, qos=1)
-                USER_ALARM_LEVEL[user_id] = levelalarm
             else:
                 client_ot.publish(OT_TOPIC,payload=pingleave(data), retain=True, qos=1)
-                USER_ALARM_LEVEL[user_id] = 0
                 USER_LAST_SEEN[user_id] = False
 
             logging.info("DEBUG : ")
