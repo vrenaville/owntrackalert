@@ -50,7 +50,7 @@ def getpreviousposition(cur,user_id):
         where userid = ? and timestamp BETWEEN ? AND ? ORDER BY ID"""
     query = cur.execute(
         sql_query,
-        (user_id,int(datetime.timestamp(datetime.now() - timedelta(0,10))),int(datetime.timestamp(datetime.now()))))
+        (user_id,int(datetime.timestamp(datetime.now() - timedelta(0,600))),int(datetime.timestamp(datetime.now()))))
 
     return query.fetchall()
 
@@ -109,11 +109,12 @@ def on_message_ot(client, userdata, msg):
         geocheck = GeoPositionAlerting(user_id=user_id,lastseen=lasteen,alertinglevel=levelalarm,radius=50)
         check_needed, check_date = geocheck.needcheck()
         USER_LAST_SEEN[user_id] = check_date
-        if check_needed:
+        if check_needed or levelalarm != 0:
             pointlist = getpreviousposition(cur,user_id)
             needalarm, levelalarm=geocheck.checkraisealarm(pointlist,[data["lon"],data["lat"]])
             if needalarm:
                 client_ot.publish(OT_TOPIC,payload=pingenten(data), retain=True, qos=1)
+                USER_ALARM_LEVEL[user_id] = levelalarm
             else:
                 client_ot.publish(OT_TOPIC,payload=pingleave(data), retain=True, qos=1)
                 USER_ALARM_LEVEL[user_id] = 0
