@@ -54,6 +54,13 @@ def getpreviousposition(cur,user_id):
 
     return query.fetchall()
 
+def getwaypoints(cur):
+    sql_query = """SELECT longitude,latitude, radius from waypoints"""
+    query = cur.execute(
+        sql_query)
+    return query.fetchall()
+
+
 def jsonping(data,event):
     ot_data = json.dumps({
         "_type": "transition",
