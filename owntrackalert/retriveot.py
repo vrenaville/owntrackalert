@@ -118,7 +118,8 @@ def on_message_ot(client, userdata, msg):
         USER_LAST_SEEN[user_id] = check_date
         if check_needed:
             pointlist = getpreviousposition(cur,user_id)
-            needalarm, levelalarm=geocheck.checkraisealarm(pointlist,[data["lon"],data["lat"]])
+            waypoints = getwaypoints(cur)
+            needalarm, levelalarm=geocheck.checkraisealarm(pointlist,[data["lon"],data["lat"]],waypoints)
             USER_ALARM_LEVEL[user_id] = levelalarm
             if needalarm:
                 client_ot.publish(OT_TOPIC,payload=pingenten(data), retain=True, qos=1)
