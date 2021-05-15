@@ -70,7 +70,7 @@ class GeoPositionAlerting:
         olddest_point = (old_longitude, old_latitude)
         for way in waypoints:
             newpoint = (way[0], way[1])
-            radius=way[3]
+            radius=way[2]
             distance = geodesic(olddest_point, newpoint).meters
             if distance <= radius:
                 insafezone = True
