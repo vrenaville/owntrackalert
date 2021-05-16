@@ -136,6 +136,8 @@ def on_message_ot(client, userdata, msg):
             logging.info("DEBUG: need_alarm %s", needalarm)
             if pointlist:
                 logging.info("DEBUG: points %s", pointlist[0])
+                logging.info("DEBUG: LON %s", data["lon"])
+                logging.info("DEBUG: LAT %s", data["lat"])
             if waypoints:
                 logging.info("DEBUG: waypoints %s", waypoints[0])
 
