@@ -136,6 +136,7 @@ def on_message_ot(client, userdata, msg):
             logging.info("DEBUG: need_alarm %s", needalarm)
             if pointlist:
                 logging.info("DEBUG: points %s", pointlist[0])
+            if waypoints:
                 logging.info("DEBUG: waypoints %s", waypoints[0])
 
  
