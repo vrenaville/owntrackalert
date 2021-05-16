@@ -59,7 +59,6 @@ class GeoPositionAlerting:
             return False, self.alertinglevel
 
     def insafezone(self,points,waypoints):
-        insafezone = False
         if not points or not waypoints:
             return False
         # Get oldest point:
@@ -71,5 +70,5 @@ class GeoPositionAlerting:
             radius=way[2]
             distance = geodesic(olddest_point, newpoint).meters
             if distance <= radius:
-                insafezone = True
-        return insafezone
+                return True
+        return False

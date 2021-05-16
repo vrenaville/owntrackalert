@@ -131,7 +131,13 @@ def on_message_ot(client, userdata, msg):
             else:
                 USER_LAST_SEEN[user_id] = False
 
-            logging.info("DEBUG : ")
+            logging.info("%s", user_id)
+            logging.info("DEBUG: Alert Level %s", levelalarm)
+            logging.info("DEBUG: need_alarm %s", needalarm)
+            if pointlist:
+                logging.info("DEBUG: points %s", pointlist[0])
+                logging.info("DEBUG: waypoints %s", waypoints[0])
+
  
         logging.info("data processing done")
     elif data['_type'] == 'lwt':
