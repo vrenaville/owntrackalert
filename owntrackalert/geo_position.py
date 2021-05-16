@@ -33,7 +33,7 @@ class GeoPositionAlerting:
         elif self.lastseen + timedelta(0,3600) <=  datetime.now() :
             check_date = datetime.now()
             check_needed = False
-        elif self.lastseen + timedelta(0,60) <= (datetime.now()):
+        elif self.lastseen + timedelta(0,600) <= (datetime.now()):
             check_date = datetime.now()
             check_needed = True
         else:
