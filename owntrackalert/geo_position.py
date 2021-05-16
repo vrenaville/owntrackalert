@@ -33,7 +33,7 @@ class GeoPositionAlerting:
         elif self.lastseen + timedelta(0,3600) <=  datetime.now() :
             check_date = datetime.now()
             check_needed = False
-        elif self.lastseen + timedelta(0,600) <= (datetime.now()):
+        elif self.lastseen + timedelta(0,60) <= (datetime.now()):
             check_date = datetime.now()
             check_needed = True
         else:
@@ -54,7 +54,8 @@ class GeoPositionAlerting:
         newpoint = (currentpoint[0], currentpoint[1])
         distance = geodesic(olddest_point, newpoint).meters
         logging.info("DEBUG: DISTANCE %s", distance)
-        if distance > self.autorisedradius:
+        logging.info("DEBUG: RADIUS %s", self.autorisedradius)
+        if distance < self.autorisedradius:
             return True, self.alertinglevel + 1
         else:
             return False, self.alertinglevel
