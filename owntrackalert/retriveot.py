@@ -61,7 +61,7 @@ def getwaypoints(cur):
     return query.fetchall()
 
 
-def jsonping(data,event):
+def jsonping(data,event,message):
     ot_data = json.dumps({
         "_type": "transition",
         "wtst": int(datetime.timestamp(datetime.now())),
@@ -71,16 +71,16 @@ def jsonping(data,event):
         "acc": 0,
         "tid": data["tid"],
         "event": event,
-        "desc": "No move from %s since 10 minutes" %(data["tid"],),
+        "desc": message %(data["tid"],),
         "t": "c",
     })
     return ot_data
 
 def pingenten(data):
-    return jsonping(data,"enter")
+    return jsonping(data,"enter","Alert: No move from %s since 10 minutes")
 
 def pingleave(data):
-   return jsonping(data,"leave")
+   return jsonping(data,"leave","End Alert:  %s is moving")
 
 
 # The callback for when a PUBLISH message is received from the server.
@@ -122,7 +122,7 @@ def on_message_ot(client, userdata, msg):
             needalarm, levelalarm=geocheck.checkraisealarm(pointlist,[data["lon"],data["lat"]],waypoints)
             USER_ALARM_LEVEL[user_id] = levelalarm
             if needalarm:
-                if levelalarm < 10:
+                if levelalarm == 1:
                     client_ot.publish(OT_TOPIC,payload=pingenten(data), retain=True, qos=1)
             elif not needalarm and levelalarm != 0:
                 client_ot.publish(OT_TOPIC,payload=pingleave(data), retain=True, qos=1)
