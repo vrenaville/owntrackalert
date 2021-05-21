@@ -20,7 +20,6 @@ VERSION = "v1.0"
 CON = False
 OT_TID="dragino"
 OT_TOPIC="owntracks/recorder/alert"
-USER_LAST_SEEN={}
 USER_ALARM_LEVEL={}
 
 def on_connect_ot(client, userdata, flags, rc):
@@ -50,7 +49,7 @@ def getpreviousposition(cur,user_id):
         where userid = ? and timestamp BETWEEN ? AND ? ORDER BY ID"""
     query = cur.execute(
         sql_query,
-        (user_id,int(datetime.timestamp(datetime.now() - timedelta(0,600))),int(datetime.timestamp(datetime.now()))))
+        (user_id,int(datetime.timestamp(datetime.now() - timedelta(0,600))),int(datetime.timestamp(datetime.now() - timedelta(0,540)))))
 
     return query.fetchall()
 
@@ -111,13 +110,10 @@ def on_message_ot(client, userdata, msg):
         cur.execute(sql, values)
         CON.commit()
         # manage alarm
-        lasteen = USER_LAST_SEEN.get(user_id,False)
         levelalarm = USER_ALARM_LEVEL.get(user_id,0)
-        geocheck = GeoPositionAlerting(user_id=user_id,lastseen=lasteen,alertinglevel=levelalarm,radius=50)
-        check_needed, check_date = geocheck.needcheck()
-        USER_LAST_SEEN[user_id] = check_date
-        if check_needed:
-            pointlist = getpreviousposition(cur,user_id)
+        geocheck = GeoPositionAlerting(user_id=user_id,alertinglevel=levelalarm,radius=50)
+        pointlist = getpreviousposition(cur,user_id)
+        if pointlist:
             waypoints = getwaypoints(cur)
             needalarm, levelalarm=geocheck.checkraisealarm(pointlist,[data["lon"],data["lat"]],waypoints)
             USER_ALARM_LEVEL[user_id] = levelalarm
@@ -126,10 +122,7 @@ def on_message_ot(client, userdata, msg):
                     client_ot.publish(OT_TOPIC,payload=pingenten(data), retain=True, qos=1)
             elif not needalarm and levelalarm != 0:
                 client_ot.publish(OT_TOPIC,payload=pingleave(data), retain=True, qos=1)
-                USER_LAST_SEEN[user_id] = False
                 USER_ALARM_LEVEL[user_id] = 0
-            else:
-                USER_LAST_SEEN[user_id] = False
 
             logging.info("%s", user_id)
             logging.info("DEBUG: Alert Level %s", levelalarm)

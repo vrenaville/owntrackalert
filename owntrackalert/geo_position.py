@@ -8,39 +8,17 @@ import sqlite3
 from geopy.distance import geodesic
 
 class GeoPositionAlerting:
-    lastseen = False
     alertinglevel = 0
     autorisedradius = 0
     sqlcursor = False
     checkingrate = 0
     user_id = 0
 
-    def __init__(self, user_id, lastseen, alertinglevel, radius):
-        self.lastseen = lastseen
+    def __init__(self, user_id, alertinglevel, radius):
         self.alertinglevel = alertinglevel
         self.autorisedradius = radius
         self.user_id = user_id
     
-    def needcheck(self):
-        check_date = False
-        check_needed = False
-        if self.alertinglevel != 0:
-            check_date = self.lastseen
-            check_needed = True
-        elif not self.lastseen:
-            check_date = datetime.now()
-            check_needed = False
-        elif self.lastseen + timedelta(0,3600) <=  datetime.now() :
-            check_date = datetime.now()
-            check_needed = False
-        elif self.lastseen + timedelta(0,600) <= (datetime.now()):
-            check_date = datetime.now()
-            check_needed = True
-        else:
-            check_needed = False
-            check_date = self.lastseen
-        return check_needed, check_date
-
  
     def checkraisealarm(self,points,currentpoint,waypoints):
         if not points:
