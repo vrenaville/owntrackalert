@@ -3,7 +3,6 @@ import json
 import os
 import logging
 import signal
-import requests
 from datetime import datetime
 from dotenv import find_dotenv, load_dotenv
 
