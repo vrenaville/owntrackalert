@@ -58,28 +58,28 @@ def on_message_ttn(client, userdata, msg):
         logging.info("received via gw %s", gtw_id)
 
     # max is 4 volts, 3 volts is considered empty
-    batpercent = round((data["uplink_message"]["decoded_payload"]["battery"] - 3) * 100)
+    batpercent = round((data["uplink_message"]["decoded_payload"]['DecodeDataObj']["battery"] - 3) * 100)
 
     got_fix = False
-    if not data["uplink_message"]["decoded_payload"].get('gps', False):
+    if not data["uplink_message"]["decoded_payload"]['DecodeDataObj'].get('gps', False):
         logging.info("no GPS data (Latitude) present")
         # set GPS data to 0 for InfluxDB
     else:
         logging.info("GPS data (Latitude) present: lat %s, lon %s",
-          data["uplink_message"]["decoded_payload"]['gps']["latitude"],
-          data["uplink_message"]["decoded_payload"]['gps']["longitude"]
+          data["uplink_message"]["decoded_payload"]['DecodeDataObj']['gps']["latitude"],
+          data["uplink_message"]["decoded_payload"]['DecodeDataObj']['gps']["longitude"]
         )
         got_fix = True
         # transform received data into OwnTracks format
         ot_data = json.dumps({
             "_type": "location",
             "acc": 0,
-            "alt": data["uplink_message"]["decoded_payload"]['gps']["altitude"],
+            "alt": data["uplink_message"]["decoded_payload"]['DecodeDataObj']['gps']["altitude"],
             "vac": 0,
             "vel": 0,
             "conn": 0,
-            "lat": data["uplink_message"]["decoded_payload"]['gps']["latitude"],
-            "lon": data["uplink_message"]["decoded_payload"]['gps']["longitude"],
+            "lat": data["uplink_message"]["decoded_payload"]['DecodeDataObj']['gps']["latitude"],
+            "lon": data["uplink_message"]["decoded_payload"]['DecodeDataObj']['gps']["longitude"],
             "batt": batpercent,
             "t": "p",
             "tid": OT_TID,
