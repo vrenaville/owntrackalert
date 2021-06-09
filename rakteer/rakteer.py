@@ -20,7 +20,7 @@ TRACEPING = os.getenv("TRACEPING")
 VERSION = "v2.0"
 
 OT_TOPIC="owntracks/alexandre/dragino"
-OT_TID="dragino"
+OT_TID="rak"
 ALERT_FLAG = {}
 def on_connect_ttn(client, userdata, flags, rc):
     logging.info("connected to ttn %s - %s", SRC_MQTT_HOST, str(rc))
