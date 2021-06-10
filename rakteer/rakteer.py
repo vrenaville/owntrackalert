@@ -18,7 +18,7 @@ TRACEPING = os.getenv("TRACEPING")
 
 VERSION = "v2.0"
 
-OT_TOPIC="owntracks/alexandre/dragino"
+OT_TOPIC="owntracks/alexandre/rak"
 OT_TID="rak"
 ALERT_FLAG = {}
 def on_connect_ttn(client, userdata, flags, rc):
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         datefmt='%Y-%m-%d %H:%M:%S %Z'
     )
 
-    logging.info("Starting ioteer lgt92. "+VERSION)
+    logging.info("Starting ioteer Rak. "+VERSION)
 
     # Prepare MQTT for The Things Network
     client_ttn = mqtt.Client()
