@@ -31,8 +31,6 @@ class GeoPositionAlerting:
         olddest_point = (old_longitude, old_latitude)
         newpoint = (currentpoint[0], currentpoint[1])
         distance = geodesic(olddest_point, newpoint).meters
-        logging.info("DEBUG: DISTANCE %s", distance)
-        logging.info("DEBUG: RADIUS %s", self.autorisedradius)
         if distance < self.autorisedradius:
             return True, self.alertinglevel + 1
         else:

@@ -15,11 +15,13 @@ load_dotenv(find_dotenv())
 MQTT_HOST = os.getenv("DST_MQTT_HOST")
 MQTT_USER = os.getenv("DST_MQTT_USER")
 MQTT_PASS = os.getenv("DST_MQTT_PASS")
+ALLOWED_RADIUS = os.getenv("ALLOWED_RADIUS", 50)
+INACTIVITY_TIME = os.getenv("INACTIVITY_TIME", 600)
+
 
 VERSION = "v1.0"
 CON = False
-OT_TID="dragino"
-OT_TOPIC="owntracks/recorder/alert"
+OT_TOPIC="owntracks/recorder/owntrackalert/event"
 USER_ALARM_LEVEL={}
 
 def on_connect_ot(client, userdata, flags, rc):
@@ -49,7 +51,7 @@ def getpreviousposition(cur,user_id):
         where userid = ? and timestamp BETWEEN ? AND ? ORDER BY ID"""
     query = cur.execute(
         sql_query,
-        (user_id,int(datetime.timestamp(datetime.now() - timedelta(0,600))),int(datetime.timestamp(datetime.now() - timedelta(0,540)))))
+        (user_id,int(datetime.timestamp(datetime.now() - timedelta(0,INACTIVITY_TIME))),int(datetime.timestamp(datetime.now() - timedelta(0,INACTIVITY_TIME - 60)))))
 
     return query.fetchall()
 
@@ -111,30 +113,20 @@ def on_message_ot(client, userdata, msg):
         CON.commit()
         # manage alarm
         levelalarm = USER_ALARM_LEVEL.get(user_id,0)
-        geocheck = GeoPositionAlerting(user_id=user_id,alertinglevel=levelalarm,radius=50)
+        geocheck = GeoPositionAlerting(user_id=user_id,alertinglevel=levelalarm,radius=ALLOWED_RADIUS)
         pointlist = getpreviousposition(cur,user_id)
         if pointlist:
             waypoints = getwaypoints(cur)
             needalarm, levelalarm=geocheck.checkraisealarm(pointlist,[data["lon"],data["lat"]],waypoints)
             USER_ALARM_LEVEL[user_id] = levelalarm
             if needalarm:
+                logging.info(">>>Alarm raise for %s", data["tid"])
                 if levelalarm == 1:
                     client_ot.publish(OT_TOPIC,payload=pingenten(data), retain=True, qos=1)
             elif not needalarm and levelalarm != 0:
+                logging.info("<<<Alarm leave for %s", data["tid"])
                 client_ot.publish(OT_TOPIC,payload=pingleave(data), retain=True, qos=1)
                 USER_ALARM_LEVEL[user_id] = 0
-
-            logging.info("%s", user_id)
-            logging.info("DEBUG: Alert Level %s", levelalarm)
-            logging.info("DEBUG: need_alarm %s", needalarm)
-            if pointlist:
-                logging.info("DEBUG: points %s", pointlist[0])
-                logging.info("DEBUG: LON %s", data["lon"])
-                logging.info("DEBUG: LAT %s", data["lat"])
-            if waypoints:
-                logging.info("DEBUG: waypoints %s", waypoints[0])
-
- 
         logging.info("data processing done")
     elif data['_type'] == 'lwt':
         logging.info("Lost connection")
