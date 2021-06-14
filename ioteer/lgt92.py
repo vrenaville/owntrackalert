@@ -148,7 +148,7 @@ def on_message_ttn(client, userdata, msg):
         ot_data = json.dumps({
             "_type": "location",
             "acc": 0,
-            "alt": 0,
+            "alt": data["uplink_message"]["decoded_payload"]["Altitude"],
             "vac": 0,
             "vel": 0,
             "conn": 0,
