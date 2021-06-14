@@ -18,7 +18,7 @@ TRACEPING = os.getenv("TRACEPING")
 
 VERSION = "v2.0"
 
-OT_TOPIC="owntracks/alexandre/rak"
+OT_TOPIC="owntracks/rak/rak"
 OT_TID="rak"
 ALERT_FLAG = {}
 def on_connect_ttn(client, userdata, flags, rc):
