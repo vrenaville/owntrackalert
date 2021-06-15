@@ -122,10 +122,10 @@ def on_message_ot(client, userdata, msg):
             if needalarm:
                 logging.info(">>>Alarm raise for %s", data["tid"])
                 if levelalarm == 1:
-                    client_ot.publish(OT_TOPIC,payload=pingenten(data), retain=True, qos=1)
+                    client_ot.publish(OT_TOPIC,payload=pingenten(data), retain=False, qos=1)
             elif not needalarm and levelalarm != 0:
                 logging.info("<<<Alarm leave for %s", data["tid"])
-                client_ot.publish(OT_TOPIC,payload=pingleave(data), retain=True, qos=1)
+                client_ot.publish(OT_TOPIC,payload=pingleave(data), retain=False, qos=1)
                 USER_ALARM_LEVEL[user_id] = 0
         logging.info("data processing done")
     elif data['_type'] == 'lwt':
