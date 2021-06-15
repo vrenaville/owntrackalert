@@ -77,7 +77,7 @@ def on_message_ttn(client, userdata, msg):
             "conn": "m",
         })
         # publish to owntracks
-        logging.info("publishing data to owntracks via mqtt to topic %s", ENV_TOPIC)
+        logging.info("publishing data to owntracks via mqtt to topic %s", OT_TOPIC)
         client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
     env_data = json.dumps({
         "battery": batpercent,
