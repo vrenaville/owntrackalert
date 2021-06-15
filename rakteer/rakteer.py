@@ -19,7 +19,11 @@ TRACEPING = os.getenv("TRACEPING")
 VERSION = "v2.0"
 
 OT_TOPIC="owntracks/rak/rak"
-ENV_TOPIC="envcontrol/rak/rak"
+TEMPERATURE_TOPIC="envcontrol/rak/rak/temperature"
+HUMIDITY_TOPIC="envcontrol/rak/rak"
+BAROMETER_TOPIC="envcontrol/rak/rak"
+BATTERY_TOPIC="envcontrol/rak/rak"
+
 OT_TID="rak"
 ALERT_FLAG = {}
 def on_connect_ttn(client, userdata, flags, rc):
@@ -81,14 +85,24 @@ def on_message_ttn(client, userdata, msg):
         client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
     env_data = json.dumps({
         "battery": batpercent,
-        "temperature": data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["temperature"],
-        "barometer": data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["barometer"],
-        "humidity": data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["humidity"],
-        "tst": int(datetime.timestamp(datetime.now())),
-        "tid": OT_TID,
     })
-    logging.info("publishing data to environment via mqtt to topic %s", ENV_TOPIC)
-    client_ot.publish(ENV_TOPIC, payload=env_data, retain=True, qos=1)
+    logging.info("publishing data to battery via mqtt to topic %s", BATTERY_TOPIC)
+    client_ot.publish(BATTERY_TOPIC, payload=env_data, retain=True, qos=1)
+    env_data = json.dumps({
+        "temperature": data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["temperature"],
+    })
+    logging.info("publishing data to temperature via mqtt to topic %s", TEMPERATURE_TOPIC)
+    client_ot.publish(TEMPERATURE_TOPIC, payload=env_data, retain=True, qos=1)
+    env_data = json.dumps({
+        "barometer":data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["barometer"],
+    })
+    logging.info("publishing data to barometer via mqtt to topic %s", BAROMETER_TOPIC)
+    client_ot.publish(BAROMETER_TOPIC, payload=env_data, retain=True, qos=1)
+    env_data = json.dumps({
+        "humidity":data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["humidity"],
+    })
+    logging.info("publishing data to humidity via mqtt to topic %s", HUMIDITY_TOPIC)
+    client_ot.publish(HUMIDITY_TOPIC, payload=env_data, retain=True, qos=1)
 
 
 
