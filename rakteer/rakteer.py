@@ -19,6 +19,7 @@ TRACEPING = os.getenv("TRACEPING")
 VERSION = "v2.0"
 
 OT_TOPIC="owntracks/rak/rak"
+ENV_TOPIC="envcontrol/rak/rak"
 OT_TID="rak"
 ALERT_FLAG = {}
 def on_connect_ttn(client, userdata, flags, rc):
@@ -36,9 +37,6 @@ def on_log(client, userdata, level, buf):
     logging_level = mqtt.LOGGING_LEVEL[level]
     logging.log(logging_level, buf)
     #logging.info("got a log message level %s: %s", level, str(buf))
-    if "PINGRESP" in str(buf):
-        # report to https://healthchecks.io to tell that the connection is alive
-        requests.get(HC_PING_URL)
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message_ttn(client, userdata, msg):
@@ -47,15 +45,7 @@ def on_message_ttn(client, userdata, msg):
 
     # retrieve info about gateway
     gtw_id = data["uplink_message"]["rx_metadata"][0]["gateway_ids"]["gateway_id"]
-    try:
-        gtw_info = requests.get("https://www.thethingsnetwork.org/gateway-data/gateway/"+gtw_id).json()
-        logging.info("received via gw %s, %s, owned by %s",
-            gtw_id,
-            gtw_info[gtw_id]["description"],
-            gtw_info[gtw_id]["owner"],
-        )
-    except:
-        logging.info("received via gw %s", gtw_id)
+    logging.info("received via gw %s", gtw_id)
 
     # max is 4 volts, 3 volts is considered empty
     batpercent = round((data["uplink_message"]["decoded_payload"]['DecodeDataObj']["battery"] - 3) * 100)
@@ -86,10 +76,20 @@ def on_message_ttn(client, userdata, msg):
             "tst": int(datetime.timestamp(datetime.now())),
             "conn": "m",
         })
-
         # publish to owntracks
-        logging.info("publishing data to owntracks via mqtt to topic %s", OT_TOPIC)
+        logging.info("publishing data to owntracks via mqtt to topic %s", ENV_TOPIC)
         client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
+    env_data = json.dumps({
+        "battery": batpercent,
+        "temperature": data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["temperature"],
+        "barometer": data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["barometer"],
+        "humidity": data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["humidity"],
+        "tst": int(datetime.timestamp(datetime.now())),
+        "tid": OT_TID,
+    })
+    logging.info("publishing data to environment via mqtt to topic %s", ENV_TOPIC)
+    client_ot.publish(ENV_TOPIC, payload=env_data, retain=True, qos=1)
+
 
 
     logging.info("data processing done")
