@@ -20,9 +20,9 @@ VERSION = "v2.0"
 
 OT_TOPIC="owntracks/rak/rak"
 TEMPERATURE_TOPIC="envcontrol/rak/rak/temperature"
-HUMIDITY_TOPIC="envcontrol/rak/rak"
-BAROMETER_TOPIC="envcontrol/rak/rak"
-BATTERY_TOPIC="envcontrol/rak/rak"
+HUMIDITY_TOPIC="envcontrol/rak/rak/humidity"
+BAROMETER_TOPIC="envcontrol/rak/rak/barometer"
+BATTERY_TOPIC="envcontrol/rak/rak/battery"
 
 OT_TID="rak"
 ALERT_FLAG = {}
