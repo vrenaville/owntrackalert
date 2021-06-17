@@ -52,7 +52,7 @@ def on_message_ttn(client, userdata, msg):
     logging.info("received via gw %s", gtw_id)
 
     # max is 4 volts, 3 volts is considered empty
-    batpercent = round(data["uplink_message"]["decoded_payload"]['DecodeDataObj']["battery"] / 0.037)
+    batpercent = round((data["uplink_message"]["decoded_payload"]['DecodeDataObj']["battery"] -3) / 0.007)
 
     got_fix = False
     if not data["uplink_message"]["decoded_payload"]['DecodeDataObj'].get('gps', False):
