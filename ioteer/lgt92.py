@@ -20,6 +20,7 @@ TRACEPING = os.getenv("TRACEPING")
 VERSION = "v2.0"
 
 OT_TOPIC="owntracks/alexandre/dragino"
+BATTERY_TOPIC="envcontrol/dragino/dragino/battery"
 OT_TID="dragino"
 ALERT_FLAG = {}
 def on_connect_ttn(client, userdata, flags, rc):
@@ -164,6 +165,11 @@ def on_message_ttn(client, userdata, msg):
         # publish to owntracks
         logging.info("publishing data to owntracks via mqtt to topic %s", OT_TOPIC)
         client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
+    env_data = json.dumps({
+        "battery": batpercent,
+    })
+    logging.info("publishing data to battery via mqtt to topic %s", BATTERY_TOPIC)
+    client_ot.publish(BATTERY_TOPIC, payload=env_data, retain=True, qos=1)
 
 
     logging.info("data processing done")
