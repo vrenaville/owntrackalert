@@ -88,7 +88,7 @@ def on_message_ttn(client, userdata, msg):
         client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
     bmedata = { 'temperature': data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["temperature"],
                 'humidity': data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["humidity"],
-                "barometer" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["humidity"],
+                "barometer" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["barometer"],
                 "gas" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["gasResistance"],
                 "battery": batpercent
               }
