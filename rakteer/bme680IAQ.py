@@ -15,7 +15,7 @@ class IAQTracker:
 		temp = bme_data['temperature']
 		press = bme_data['barometer']
 		hum = bme_data['humidity']
-		R_gas = bme_data['gas']
+		R_gas = bme_data['gas'] * 1000
 		
 		#take logarithm of gas resistance and compensate for impact from humidity
 		comp_gas = np.log(R_gas) + self.slope * hum
