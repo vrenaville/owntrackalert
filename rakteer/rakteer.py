@@ -5,6 +5,7 @@ import logging
 import signal
 from datetime import datetime
 from dotenv import find_dotenv, load_dotenv
+from bme680IAQ import IAQTracker
 
 load_dotenv(find_dotenv())
 SRC_MQTT_HOST = os.getenv("SRC_MQTT_HOST")
@@ -23,13 +24,16 @@ TEMPERATURE_TOPIC="envcontrol/rak/rak/temperature"
 HUMIDITY_TOPIC="envcontrol/rak/rak/humidity"
 BAROMETER_TOPIC="envcontrol/rak/rak/barometer"
 BATTERY_TOPIC="envcontrol/rak/rak/battery"
+IAQ_TOPIC="envcontrol/rak/rak/iaq"
 
+IAQVALUE = False
 OT_TID="rak"
 ALERT_FLAG = {}
 def on_connect_ttn(client, userdata, flags, rc):
     logging.info("connected to ttn %s - %s", SRC_MQTT_HOST, str(rc))
     #client.subscribe("+/devices/+/up")
     #client.subscribe("#")
+    IAQVALUE = IAQTracker(burn_in_cylcles=5)
     client.subscribe("v3/+/devices/+/up")
 def on_connect_ot(client, userdata, flags, rc):
     logging.info("connected to ot %s - %s", DST_MQTT_HOST, str(rc))
@@ -83,27 +87,40 @@ def on_message_ttn(client, userdata, msg):
         # publish to owntracks
         logging.info("publishing data to owntracks via mqtt to topic %s", OT_TOPIC)
         client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
+    bmedata = { 'temperature': data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["temperature"],
+                'humidity': data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["humidity"],
+                "barometer" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["humidity"],
+                "gas" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["gasResistance"],
+                "battery": batpercent
+              }
+
     env_data = json.dumps({
         "battery": batpercent,
     })
     logging.info("publishing data to battery via mqtt to topic %s", BATTERY_TOPIC)
     client_ot.publish(BATTERY_TOPIC, payload=env_data, retain=True, qos=1)
     env_data = json.dumps({
-        "temperature": data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["temperature"],
+        "temperature": bmedata["temperature"],
     })
     logging.info("publishing data to temperature via mqtt to topic %s", TEMPERATURE_TOPIC)
     client_ot.publish(TEMPERATURE_TOPIC, payload=env_data, retain=True, qos=1)
     env_data = json.dumps({
-        "barometer":data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["barometer"],
+        "barometer":bmedata["barometer"],
     })
     logging.info("publishing data to barometer via mqtt to topic %s", BAROMETER_TOPIC)
     client_ot.publish(BAROMETER_TOPIC, payload=env_data, retain=True, qos=1)
     env_data = json.dumps({
-        "humidity":data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["humidity"],
+        "humidity":bmedata["humidity"],
     })
     logging.info("publishing data to humidity via mqtt to topic %s", HUMIDITY_TOPIC)
     client_ot.publish(HUMIDITY_TOPIC, payload=env_data, retain=True, qos=1)
-
+    iaq = IAQVALUE.getIAQ(bmedata)
+    if iaq:
+        env_data = json.dumps({
+            "iaq":iaq,
+        })
+        logging.info("publishing data to iaq via mqtt to topic %s", IAQ_TOPIC)
+        client_ot.publish(IAQ_TOPIC, payload=env_data, retain=True, qos=1)
 
 
     logging.info("data processing done")
