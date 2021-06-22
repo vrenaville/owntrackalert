@@ -33,7 +33,6 @@ def on_connect_ttn(client, userdata, flags, rc):
     logging.info("connected to ttn %s - %s", SRC_MQTT_HOST, str(rc))
     #client.subscribe("+/devices/+/up")
     #client.subscribe("#")
-    IAQVALUE = IAQTracker(burn_in_cylcles=5)
     client.subscribe("v3/+/devices/+/up")
 def on_connect_ot(client, userdata, flags, rc):
     logging.info("connected to ot %s - %s", DST_MQTT_HOST, str(rc))
@@ -148,6 +147,7 @@ if __name__ == '__main__':
     )
 
     logging.info("Starting ioteer Rak. "+VERSION)
+    IAQVALUE = IAQTracker(burn_in_cycles=5)
 
     # Prepare MQTT for The Things Network
     client_ttn = mqtt.Client()
