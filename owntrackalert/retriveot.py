@@ -180,9 +180,9 @@ if __name__ == '__main__':
     client_ot.on_publish = on_publish_ot
     client_ot.on_log = on_log
     client_ot.username_pw_set(MQTT_USER,MQTT_PASS)
-    client_ot.tls_set()
+    #client_ot.tls_set()
     #client_ot.will_set(OT_TOPIC, payload=ot_lwt, qos=1, retain=True)
-    client_ot.connect(MQTT_HOST, 8883, 60)
+    client_ot.connect(MQTT_HOST, 1883, 60)
     
     try:
         # Connect to MQTT and react to messages

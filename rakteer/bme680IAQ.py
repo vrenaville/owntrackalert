@@ -12,10 +12,10 @@ class IAQTracker:
 		
 		
 	def getIAQ(self, bme_data):
-		temp = bme_data['temperature']
-		press = bme_data['barometer']
-		hum = bme_data['humidity']
-		R_gas = bme_data['gas'] * 1000
+		temp = float(bme_data['temperature'])
+		press = float(bme_data['barometer'])
+		hum = float(bme_data['humidity'])
+		R_gas = float(bme_data['gas']) * 1000
 		
 		#take logarithm of gas resistance and compensate for impact from humidity
 		comp_gas = np.log(R_gas) + self.slope * hum
