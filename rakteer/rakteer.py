@@ -21,6 +21,9 @@ VERSION = "v2.0"
 
 OT_TOPIC="owntracks/rak/rak"
 TEMPERATURE_TOPIC="envcontrol/rak/rak/temperature"
+EXTERNAL_TEMPERATURE_TOPIC="envcontrol/rak/rak/external_temperature"
+EXTERNAL_MOSTURE_TOPIC="envcontrol/rak/rak/external_mosture"
+
 HUMIDITY_TOPIC="envcontrol/rak/rak/humidity"
 BAROMETER_TOPIC="envcontrol/rak/rak/barometer"
 BATTERY_TOPIC="envcontrol/rak/rak/battery"
@@ -90,6 +93,8 @@ def on_message_ttn(client, userdata, msg):
                 'humidity': data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["humidity"],
                 "barometer" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["barometer"],
                 "gas" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["gasResistance"],
+                "external_temperature" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['external_temp'],
+                "external_mosture" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['external_mosture'],
                 "battery": batpercent
               }
 
@@ -113,6 +118,26 @@ def on_message_ttn(client, userdata, msg):
     })
     logging.info("publishing data to humidity via mqtt to topic %s", HUMIDITY_TOPIC)
     client_ot.publish(HUMIDITY_TOPIC, payload=env_data, retain=True, qos=1)
+
+    env_data = json.dumps({
+        "external_temperature":bmedata["external_temperature"],
+    })
+    logging.info("publishing data to external temperature via mqtt to topic %s", EXTERNAL_TEMPERATURE_TOPIC)
+    client_ot.publish(EXTERNAL_TEMPERATURE_TOPIC, payload=env_data, retain=True, qos=1)
+
+    env_data = json.dumps({
+        "external_mosture":bmedata["external_mosture"],
+    })
+    logging.info("publishing data to external mosture via mqtt to topic %s", EXTERNAL_MOSTURE_TOPIC)
+    client_ot.publish(EXTERNAL_MOSTURE_TOPIC, payload=env_data, retain=True, qos=1)
+
+
+    env_data = json.dumps({
+        "humidity":bmedata["humidity"],
+    })
+    logging.info("publishing data to humidity via mqtt to topic %s", HUMIDITY_TOPIC)
+    client_ot.publish(HUMIDITY_TOPIC, payload=env_data, retain=True, qos=1)
+
     iaq = IAQVALUE.getIAQ(bmedata)
     if iaq:
         env_data = json.dumps({
