@@ -93,7 +93,7 @@ def on_message_ttn(client, userdata, msg):
                 'humidity': data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["humidity"],
                 "barometer" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["barometer"],
                 "gas" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["gasResistance"],
-                "external_temperature" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['external_temp'],
+                "external_temperature" : round(data["uplink_message"]["decoded_payload"]['DecodeDataObj']['external_temp'] /10),
                 "external_mosture" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['external_mosture'],
                 "battery": batpercent
               }
