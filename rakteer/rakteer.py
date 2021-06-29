@@ -23,6 +23,7 @@ OT_TOPIC="owntracks/rak/rak"
 TEMPERATURE_TOPIC="envcontrol/rak/rak/temperature"
 EXTERNAL_TEMPERATURE_TOPIC="envcontrol/rak/rak/external_temperature"
 EXTERNAL_MOSTURE_TOPIC="envcontrol/rak/rak/external_mosture"
+EXTERNAL_MOSTURE_POURCENT_TOPIC="envcontrol/rak/rak/external_mosture_POURCENT"
 
 HUMIDITY_TOPIC="envcontrol/rak/rak/humidity"
 BAROMETER_TOPIC="envcontrol/rak/rak/barometer"
@@ -95,6 +96,7 @@ def on_message_ttn(client, userdata, msg):
                 "gas" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['environment']["gasResistance"],
                 "external_temperature" : round(data["uplink_message"]["decoded_payload"]['DecodeDataObj']['external_temp'] /10),
                 "external_mosture" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['external_mosture'],
+                "external_mosture_pourcent" : round((data["uplink_message"]["decoded_payload"]['DecodeDataObj']['external_mosture'] - 240) / 2.43),
                 "battery": batpercent
               }
 
@@ -130,6 +132,12 @@ def on_message_ttn(client, userdata, msg):
     })
     logging.info("publishing data to external mosture via mqtt to topic %s", EXTERNAL_MOSTURE_TOPIC)
     client_ot.publish(EXTERNAL_MOSTURE_TOPIC, payload=env_data, retain=True, qos=1)
+
+    env_data = json.dumps({
+        "external_mosture_pourcent":bmedata["external_mosture_pourcent"],
+    })
+    logging.info("publishing data to external mosture pourcent via mqtt to topic %s", EXTERNAL_MOSTURE_POURCENT_TOPIC)
+    client_ot.publish(EXTERNAL_MOSTURE_POURCENT_TOPIC, payload=env_data, retain=True, qos=1)
 
 
     env_data = json.dumps({
