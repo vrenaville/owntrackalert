@@ -166,6 +166,8 @@ def on_message_ttn(client, userdata, msg):
         logging.info("publishing data to owntracks via mqtt to topic %s", OT_TOPIC)
         client_ot.publish(OT_TOPIC, payload=ot_data, retain=True, qos=1)
     env_data = json.dumps({
+        "date": int(datetime.timestamp(datetime.now())),
+        "user": data["end_device_ids"]["dev_eui"],
         "battery": batpercent,
     })
     logging.info("publishing data to battery via mqtt to topic %s", BATTERY_TOPIC)

@@ -97,7 +97,9 @@ def on_message_ttn(client, userdata, msg):
                 "external_temperature" : round(data["uplink_message"]["decoded_payload"]['DecodeDataObj']['external_temp'] /10),
                 "external_mosture" : data["uplink_message"]["decoded_payload"]['DecodeDataObj']['external_mosture'],
                 "external_mosture_pourcent" : round((data["uplink_message"]["decoded_payload"]['DecodeDataObj']['external_mosture'] - 240) / 2.43),
-                "battery": batpercent
+                "battery": batpercent,
+                "user": data["end_device_ids"]["dev_eui"],
+                "date": int(datetime.timestamp(datetime.now())),
               }
 
     env_data = json.dumps({
@@ -106,34 +108,46 @@ def on_message_ttn(client, userdata, msg):
     logging.info("publishing data to battery via mqtt to topic %s", BATTERY_TOPIC)
     client_ot.publish(BATTERY_TOPIC, payload=env_data, retain=True, qos=1)
     env_data = json.dumps({
+        "date": bmedata["date"],
+        "user": bmedata["user"],
         "temperature": bmedata["temperature"],
     })
     logging.info("publishing data to temperature via mqtt to topic %s", TEMPERATURE_TOPIC)
     client_ot.publish(TEMPERATURE_TOPIC, payload=env_data, retain=True, qos=1)
     env_data = json.dumps({
+        "date": bmedata["date"],
+        "user": bmedata["user"],
         "barometer":bmedata["barometer"],
     })
     logging.info("publishing data to barometer via mqtt to topic %s", BAROMETER_TOPIC)
     client_ot.publish(BAROMETER_TOPIC, payload=env_data, retain=True, qos=1)
     env_data = json.dumps({
+        "date": bmedata["date"],
+        "user": bmedata["user"],
         "humidity":bmedata["humidity"],
     })
     logging.info("publishing data to humidity via mqtt to topic %s", HUMIDITY_TOPIC)
     client_ot.publish(HUMIDITY_TOPIC, payload=env_data, retain=True, qos=1)
 
     env_data = json.dumps({
+        "date": bmedata["date"],
+        "user": bmedata["user"],
         "external_temperature":bmedata["external_temperature"],
     })
     logging.info("publishing data to external temperature via mqtt to topic %s", EXTERNAL_TEMPERATURE_TOPIC)
     client_ot.publish(EXTERNAL_TEMPERATURE_TOPIC, payload=env_data, retain=True, qos=1)
 
     env_data = json.dumps({
+        "date": bmedata["date"],
+        "user": bmedata["user"],
         "external_mosture":bmedata["external_mosture"],
     })
     logging.info("publishing data to external mosture via mqtt to topic %s", EXTERNAL_MOSTURE_TOPIC)
     client_ot.publish(EXTERNAL_MOSTURE_TOPIC, payload=env_data, retain=True, qos=1)
 
     env_data = json.dumps({
+        "date": bmedata["date"],
+        "user": bmedata["user"],
         "external_mosture_pourcent":bmedata["external_mosture_pourcent"],
     })
     logging.info("publishing data to external mosture pourcent via mqtt to topic %s", EXTERNAL_MOSTURE_POURCENT_TOPIC)
@@ -141,6 +155,8 @@ def on_message_ttn(client, userdata, msg):
 
 
     env_data = json.dumps({
+        "date": bmedata["date"],
+        "user": bmedata["user"],
         "humidity":bmedata["humidity"],
     })
     logging.info("publishing data to humidity via mqtt to topic %s", HUMIDITY_TOPIC)
@@ -149,7 +165,9 @@ def on_message_ttn(client, userdata, msg):
     iaq = IAQVALUE.getIAQ(bmedata)
     if iaq:
         env_data = json.dumps({
-            "iaq":iaq,
+        "date": bmedata["date"],
+        "user": bmedata["user"],
+        "iaq":iaq,
         })
         logging.info("publishing data to iaq via mqtt to topic %s", IAQ_TOPIC)
         client_ot.publish(IAQ_TOPIC, payload=env_data, retain=True, qos=1)
