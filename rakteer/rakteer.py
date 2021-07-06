@@ -198,7 +198,7 @@ if __name__ == '__main__':
     )
 
     logging.info("Starting ioteer Rak. "+VERSION)
-    IAQVALUE = IAQTracker(burn_in_cycles=0)
+    IAQVALUE = IAQTracker(burn_in_cycles=5)
 
     # Prepare MQTT for The Things Network
     client_ttn = mqtt.Client()
